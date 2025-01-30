@@ -38,7 +38,15 @@ const mockFiles = [
   },
 ];
 
-const mockMessages = [
+interface Message {
+  id: string;
+  user: string;
+  content: string;
+  timestamp: Date;
+  type: "chat" | "system";
+}
+
+const mockMessages: Message[] = [
   {
     id: "1",
     user: "Admin",
@@ -50,7 +58,7 @@ const mockMessages = [
 
 const Index = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState<Message[]>(mockMessages);
   const { toast } = useToast();
   const isAdmin = true; // This would come from your auth system
 
