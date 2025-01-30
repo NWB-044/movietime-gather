@@ -23,7 +23,6 @@ const Viewer = () => {
     e.preventDefault();
     if (username.trim()) {
       setIsJoined(true);
-      // Add system message for user joining
       const joinMessage: Message = {
         id: crypto.randomUUID(),
         user: "System",

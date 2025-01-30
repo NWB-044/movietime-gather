@@ -44,6 +44,7 @@ const mockMessages = [
     user: "Admin",
     content: "Welcome to the stream!",
     timestamp: new Date(),
+    type: "system" as const,
   },
 ];
 
@@ -66,9 +67,10 @@ const Index = () => {
       ...prev,
       {
         id: Date.now().toString(),
-        user: isAdmin ? "Admin" : "Viewer",
+        user: isAdmin ? "Admin 👑" : "Viewer",
         content,
         timestamp: new Date(),
+        type: "chat" as const,
       },
     ]);
   };
@@ -114,6 +116,7 @@ const Index = () => {
             <Chat
               messages={messages}
               onSendMessage={handleSendMessage}
+              currentTitle={selectedFile ? selectedFile.split("/").pop() : undefined}
               className="h-[400px]"
             />
           </div>
