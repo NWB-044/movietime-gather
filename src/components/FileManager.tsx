@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Folder, File, ChevronRight } from "lucide-react";
+import { Folder, File, ChevronRight, Film, Subtitles } from "lucide-react";
+import { ScrollArea } from "./ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileItem {
   name: string;
   type: "file" | "folder";
   path: string;
+  format?: string;
   children?: FileItem[];
 }
 
@@ -21,6 +24,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   className,
 }) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   const toggleFolder = (path: string) => {
     const newExpanded = new Set(expandedFolders);
@@ -30,6 +34,33 @@ export const FileManager: React.FC<FileManagerProps> = ({
       newExpanded.add(path);
     }
     setExpandedFolders(newExpanded);
+  };
+
+  const getFileIcon = (item: FileItem) => {
+    if (item.type === "folder") return <Folder className="h-4 w-4 text-blue-400" />;
+    
+    const format = item.format?.toLowerCase() || item.name.split('.').pop()?.toLowerCase();
+    
+    if (format && ['mp4', 'mkv', 'avi', 'mov'].includes(format)) {
+      return <Film className="h-4 w-4 text-purple-400" />;
+    }
+    
+    if (format && ['srt', 'vtt', 'ass'].includes(format)) {
+      return <Subtitles className="h-4 w-4 text-green-400" />;
+    }
+    
+    return <File className="h-4 w-4 text-gray-400" />;
+  };
+
+  const handleFileSelect = (item: FileItem) => {
+    if (item.type === "file") {
+      onFileSelect(item.path);
+      toast({
+        title: "File Selected",
+        description: `Now playing: ${item.name}`,
+      });
+      console.log("File selected:", item);
+    }
   };
 
   const renderItem = (item: FileItem, level: number = 0) => {
@@ -46,7 +77,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           onClick={() =>
             item.type === "folder"
               ? toggleFolder(item.path)
-              : onFileSelect(item.path)
+              : handleFileSelect(item)
           }
         >
           {item.type === "folder" && (
@@ -57,11 +88,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               )}
             />
           )}
-          {item.type === "folder" ? (
-            <Folder className="h-4 w-4 text-blue-400" />
-          ) : (
-            <File className="h-4 w-4 text-gray-400" />
-          )}
+          {getFileIcon(item)}
           <span className="text-sm">{item.name}</span>
         </div>
         {item.type === "folder" && isExpanded && item.children && (
@@ -81,9 +108,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
       )}
     >
       <h3 className="text-lg font-semibold mb-4">File Manager</h3>
-      <div className="space-y-1">
-        {files.map((file) => renderItem(file))}
-      </div>
+      <ScrollArea className="h-[400px] pr-4">
+        <div className="space-y-1">
+          {files.map((file) => renderItem(file))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { Chat } from "@/components/Chat";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   id: string;
@@ -17,7 +18,19 @@ const Viewer = () => {
   const [username, setUsername] = useState("");
   const [isJoined, setIsJoined] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [currentTitle, setCurrentTitle] = useState<string>("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Simulate receiving stream title updates
+    const updateTitle = (title: string) => {
+      setCurrentTitle(title);
+      console.log("Stream title updated:", title);
+    };
+
+    // Mock title update
+    updateTitle("Welcome to the Stream!");
+  }, []);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +49,7 @@ const Viewer = () => {
         title: "Welcome!",
         description: `You've joined as ${username}`,
       });
+      console.log("User joined:", username);
     }
   };
 
@@ -54,7 +68,7 @@ const Viewer = () => {
   if (!isJoined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-8 animate-fade-in">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight mb-2">Join Stream</h1>
             <p className="text-muted-foreground">
@@ -66,9 +80,10 @@ const Viewer = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Your username"
+              className="text-lg"
               required
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full text-lg">
               Join Stream
             </Button>
           </form>
@@ -80,19 +95,26 @@ const Viewer = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 space-y-4">
-        <header className="text-center space-y-2 mb-8">
+        <header className="text-center space-y-2 mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold tracking-tight">Stream Viewer</h1>
           <p className="text-muted-foreground">
             Welcome, {username}
           </p>
+          {currentTitle && (
+            <p className="text-lg font-medium text-primary">
+              Now Playing: {currentTitle}
+            </p>
+          )}
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-9">
-            <div className="aspect-video flex items-center justify-center border rounded-lg bg-accent/10">
-              <p className="text-muted-foreground">
-                Waiting for admin to start the stream...
-              </p>
+          <div className="lg:col-span-9 space-y-4">
+            <div className="aspect-video rounded-lg overflow-hidden shadow-xl animate-fade-in">
+              <VideoPlayer
+                src=""
+                className="w-full h-full"
+                onTimeUpdate={(time) => console.log("Current time:", time)}
+              />
             </div>
           </div>
 
@@ -100,7 +122,8 @@ const Viewer = () => {
             <Chat
               messages={messages}
               onSendMessage={handleSendMessage}
-              className="h-[calc(100vh-12rem)]"
+              currentTitle={currentTitle}
+              className="h-[calc(100vh-12rem)] animate-fade-in"
             />
           </div>
         </div>
