@@ -5,20 +5,51 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
+interface Message {
+  id: string;
+  user: string;
+  content: string;
+  timestamp: Date;
+  type: "chat" | "system";
+}
+
 const Viewer = () => {
   const [username, setUsername] = useState("");
   const [isJoined, setIsJoined] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username.trim()) {
       setIsJoined(true);
+      // Add system message for user joining
+      const joinMessage: Message = {
+        id: crypto.randomUUID(),
+        user: "System",
+        content: `${username} has joined the stream`,
+        timestamp: new Date(),
+        type: "system"
+      };
+      setMessages(prev => [...prev, joinMessage]);
+      
       toast({
         title: "Welcome!",
         description: `You've joined as ${username}`,
       });
     }
+  };
+
+  const handleSendMessage = (content: string) => {
+    const newMessage: Message = {
+      id: crypto.randomUUID(),
+      user: username,
+      content,
+      timestamp: new Date(),
+      type: "chat"
+    };
+    setMessages(prev => [...prev, newMessage]);
+    console.log("New message sent:", newMessage);
   };
 
   if (!isJoined) {
@@ -68,8 +99,8 @@ const Viewer = () => {
 
           <div className="lg:col-span-3">
             <Chat
-              messages={[]}
-              onSendMessage={(content) => console.log("New message:", content)}
+              messages={messages}
+              onSendMessage={handleSendMessage}
               className="h-[calc(100vh-12rem)]"
             />
           </div>
